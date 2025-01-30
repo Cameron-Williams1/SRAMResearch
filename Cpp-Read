@@ -1,0 +1,46 @@
+// Define the pins for the SRAM
+const int CE_PIN = 10;  // Chip Enable
+const int WE_PIN = 11;  // Write Enable
+const int OE_PIN = 12;  // Output Enable
+const int DATA_PIN = 2; // Data pin (D0)
+const int ADDRESS_PIN = 3; // Address pin (A0)
+
+void setup() {
+  Serial.begin(9600);
+  
+  // Set the SRAM control pins as outputs
+  pinMode(CE_PIN, OUTPUT);
+  pinMode(WE_PIN, OUTPUT);
+  pinMode(OE_PIN, OUTPUT);
+  
+  // Set the data and address pins as outputs
+  pinMode(DATA_PIN, OUTPUT);
+  pinMode(ADDRESS_PIN, OUTPUT);
+  
+  // Enable the SRAM chip
+  digitalWrite(CE_PIN, HIGH);
+  
+  // Generate a random number
+  int randomNumber = random(0, 256); 
+  Serial.print("Random Number: ");
+  Serial.println(randomNumber);
+  
+  // Write the random number to the SRAM
+  writeToSRAM(0, randomNumber); // Write to address 0
+}
+
+void loop() {
+}
+
+void writeToSRAM(int address, int data) {
+  // Set the address
+  digitalWrite(ADDRESS_PIN, address);
+  
+  // Set the data
+  digitalWrite(DATA_PIN, data);
+  
+  // Enable write operation
+  digitalWrite(WE_PIN, LOW); // Set WE low to write
+  delayMicroseconds(1);       // Wait for a short time
+  digitalWrite(WE_PIN, HIGH); // Set WE high to finish writing
+}
