@@ -1,0 +1,67 @@
+import random
+import RPi.GPIO as GPIO
+import time
+
+# Define GPIO pins for SRAM
+CE_PIN = 36  # Chip Enable Green
+WE_PIN = 38  # Write Enable Yellow
+OE_PIN = 40  # Output Enable Black
+# Address lines A0 to A12
+A0_PIN = 3 # Blue
+A1_PIN = 5 # Green
+A2_PIN = 7 # Purple
+A3_PIN = 11 # White
+A4_PIN = 13 # Black
+88,A5_PIN = 15 # Greyish White
+A6_PIN = 19 # Orange
+A7_PIN = 21 # Red
+A8_PIN = 23 # Orange
+A9_PIN = 29 # Yellow
+A10_PIN = 31 # White
+A11_PIN = 33 # White
+A12_PIN = 35 # Brown
+# Data lines D0 to D7
+D0_PIN = 8 # White
+D1_PIN = 10 # Blue
+D2_PIN = 12 # Brown
+D3_PIN = 16 # Red
+D4_PIN = 18 # Orange
+D5_PIN = 22 # Yellow
+D6_PIN = 24 # Green
+D7_PIN = 26 # Purple
+
+# Setup GPIO
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup([CE_PIN, WE_PIN, OE_PIN, 
+             A0_PIN, A1_PIN, A2_PIN, A3_PIN, A4_PIN, 
+             A5_PIN, A6_PIN, A7_PIN, A8_PIN, A9_PIN, 
+             A10_PIN, A11_PIN, A12_PIN, 
+             D0_PIN, D1_PIN, D2_PIN, D3_PIN, D4_PIN, 
+             D5_PIN, D6_PIN, D7_PIN], GPIO.OUT)
+
+def write_to_sram(address, data):
+    # Set address lines
+    for i in range(13):
+        GPIO.output(eval(f'A{i}_PIN'), (address >> i) & 1)
+
+    # Set data lines
+    for i in range(8):
+        GPIO.output(eval(f'D{i}_PIN'), (data >> i) & 1)
+
+    # Write to SRAM
+    GPIO.output(CE_PIN, GPIO.LOW)  # Enable chip
+    GPIO.output(WE_PIN, GPIO.LOW)  # Enable write
+    time.sleep(0.01)               # Wait for write to complete
+    GPIO.output(WE_PIN, GPIO.HIGH) # Disable write
+    GPIO.output(CE_PIN, GPIO.HIGH) # Disable chip
+
+try:
+    # Generate a random number (8 bits)
+    random_number = random.randint(0, 255)  # 0 to 255 for 8 bits
+    address = random.randint(0, 8191)  # Random address in the range of 0 to 8191
+
+    write_to_sram(address, random_number)
+    print(f"Wrote {random_number} to SRAM at address {address}")
+
+finally:
+    GPIO.cleanup()
